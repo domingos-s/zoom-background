@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoom Background Creator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef1f4;
+      --surface: #ffffff;
+      --surface-muted: #f6f8fa;
+      --text: #17202a;
+      --muted: #66727f;
+      --line: #d9e0e7;
+      --accent: #147c8c;
+      --accent-dark: #0d5d69;
+      --danger: #a74132;
+      --shadow: 0 18px 45px rgba(28, 39, 49, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        linear-gradient(135deg, rgba(20, 124, 140, 0.12), rgba(238, 241, 244, 0) 34%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app-shell {
+      width: min(1500px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--accent-dark);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.05;
+    }
+
+    .topbar p {
+      max-width: 560px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .button {
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 10px 14px;
+      background: var(--accent);
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: 750;
+      transition: background 140ms ease, transform 140ms ease, border-color 140ms ease;
+    }
+
+    .button:hover {
+      background: var(--accent-dark);
+    }
+
+    .button:active {
+      transform: translateY(1px);
+    }
+
+    .button.secondary {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    .button.secondary:hover {
+      background: var(--surface-muted);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel,
+    .preview-panel {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(217, 224, 231, 0.9);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    details.panel {
+      overflow: clip;
+    }
+
+    details.panel[open] summary {
+      border-bottom: 1px solid var(--line);
+    }
+
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 52px;
+      padding: 0 16px;
+      cursor: pointer;
+      font-weight: 850;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "+";
+      color: var(--muted);
+      font-size: 22px;
+      font-weight: 500;
+    }
+
+    details[open] summary::after {
+      content: "-";
+    }
+
+    .panel-body {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 11px;
+      background: #ffffff;
+      color: var(--text);
+    }
+
+    input[type="color"] {
+      min-height: 40px;
+      padding: 4px;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      accent-color: var(--accent);
+    }
+
+    input[type="file"] {
+      padding: 8px;
+      background: var(--surface-muted);
+    }
+
+    .swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .swatch {
+      width: 30px;
+      height: 30px;
+      border: 1px solid rgba(23, 32, 42, 0.18);
+      border-radius: 999px;
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.58);
+      cursor: pointer;
+    }
+
+    .swatch:hover,
+    .swatch:focus-visible {
+      outline: 3px solid rgba(20, 124, 140, 0.24);
+      outline-offset: 2px;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 650;
+      text-transform: none;
+    }
+
+    .checkbox input {
+      width: 18px;
+      min-height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .hint {
+      margin: -2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .preview-panel {
+      padding: 16px;
+      position: sticky;
+      top: 16px;
+    }
+
+    .canvas-wrap {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #101820;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      height: auto;
+    }
+
+    .preview-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status {
+      color: var(--danger);
+      min-height: 18px;
+    }
+
+    @media (max-width: 1050px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .app-shell {
+        width: min(100vw - 18px, 1500px);
+        padding: 14px 0;
+      }
+
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+
+      .actions,
+      .button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Browser tool</p>
+        <h1>Zoom Background Creator</h1>
+        <p>Design a 16:9 background with a branded information panel, preview it instantly, then export a Zoom-ready PNG.</p>
+      </div>
+      <div class="actions">
+        <button class="button secondary" id="resetBtn" type="button">Reset</button>
+        <button class="button" id="downloadBtn" type="button">Download Zoom Background</button>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <form class="controls" id="controls">
+        <details class="panel" open>
+          <summary>Brand and Assets</summary>
+          <div class="panel-body">
+            <div class="field">
+              <label for="backgroundSelect">Community</label>
+              <select id="backgroundSelect">
+              </select>
+              <p class="hint">When served locally, the list is discovered from the communities folder.</p>
+            </div>
+            <div class="field" id="backgroundUploadField" hidden>
+              <label for="backgroundUpload">Custom community image</label>
+              <input id="backgroundUpload" type="file" accept="image/*">
+            </div>
+            <div class="field">
+              <label for="logoSelect">Logo</label>
+              <select id="logoSelect">
+                <option value="logo/TWC_Icon_rgb_light.svg">The Wolff Company</option>
+                <option value="logo/revel.png">Revel Communities</option>
+                <option value="custom">Upload custom logo</option>
+              </select>
+            </div>
+            <div class="field" id="logoUploadField" hidden>
+              <label for="logoUpload">Custom logo image</label>
+              <input id="logoUpload" type="file" accept="image/*">
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="panelColor">Panel color</label>
+                <input id="panelColor" type="color" value="#f4f1ec">
+                <div class="swatches" data-palette-group="panelColor" aria-label="Suggested panel colors"></div>
+              </div>
+              <div class="field">
+                <label for="accentColor">Accent color</label>
+                <input id="accentColor" type="color" value="#147c8c">
+                <div class="swatches" data-palette-group="accentColor" aria-label="Suggested accent colors"></div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="panel" open>
+          <summary>Contact Details</summary>
+          <div class="panel-body">
+            <div class="field">
+              <label for="personName">Name</label>
+              <input id="personName" type="text" value="Jane Santos" autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="personTitle">Title</label>
+              <input id="personTitle" type="text" value="Regional Director" autocomplete="organization-title">
+            </div>
+            <div class="field">
+              <label for="personEmail">Email</label>
+              <input id="personEmail" type="email" value="jane.santos@example.com" autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="personPhone">Phone</label>
+              <input id="personPhone" type="tel" value="(555) 014-2026" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="primaryTextColor">Name and contact color</label>
+              <input id="primaryTextColor" type="color" value="#17202a">
+              <div class="swatches" data-palette-group="primaryTextColor" aria-label="Suggested primary text colors"></div>
+            </div>
+            <div class="field">
+              <label for="secondaryTextColor">Title color</label>
+              <input id="secondaryTextColor" type="color" value="#4f5c67">
+              <div class="swatches" data-palette-group="secondaryTextColor" aria-label="Suggested title colors"></div>
+            </div>
+          </div>
+        </details>
+
+        <details class="panel" open>
+          <summary>Layout</summary>
+          <div class="panel-body">
+            <div class="field">
+              <label for="panelWidth">Panel width <span id="panelWidthValue">360</span>px</label>
+              <input id="panelWidth" type="range" min="300" max="470" step="5" value="360">
+            </div>
+            <div class="field">
+              <label for="logoSize">Logo box size <span id="logoSizeValue">170</span>px</label>
+              <input id="logoSize" type="range" min="90" max="240" step="2" value="170">
+            </div>
+            <div class="field">
+              <label for="textScale">Text scale <span id="textScaleValue">100</span>%</label>
+              <input id="textScale" type="range" min="78" max="125" step="1" value="100">
+            </div>
+            <label class="checkbox" for="showGuides">
+              <input id="showGuides" type="checkbox">
+              Show preview guides
+            </label>
+            <p class="hint">Guides appear in preview only and are not included in the downloaded PNG.</p>
+          </div>
+        </details>
+      </form>
+
+      <section class="preview-panel" aria-label="Zoom background preview">
+        <div class="canvas-wrap">
+          <canvas id="zoomCanvas" width="1280" height="720"></canvas>
+        </div>
+        <div class="preview-meta">
+          <span>1280 x 720 PNG</span>
+          <span class="status" id="status" role="status"></span>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const CANVAS_WIDTH = 1280;
+    const CANVAS_HEIGHT = 720;
+
+    const defaults = {
+      backgroundSelect: "communities/4730_California.jpg",
+      logoSelect: "logo/TWC_Icon_rgb_light.svg",
+      panelColor: "#f4f1ec",
+      accentColor: "#147c8c",
+      personName: "Jane Santos",
+      personTitle: "Regional Director",
+      personEmail: "jane.santos@example.com",
+      personPhone: "(555) 014-2026",
+      primaryTextColor: "#17202a",
+      secondaryTextColor: "#4f5c67",
+      panelWidth: "360",
+      logoSize: "170",
+      textScale: "100",
+      showGuides: false
+    };
+
+    const imageCache = new Map();
+    const customImages = {
+      background: "",
+      logo: ""
+    };
+    let activeBrand = "wolff";
+
+    // Add new community image filenames here after placing them in /communities.
+    const communityFiles = [
+      "4730_California.jpg",
+      "800J_Lofts.jpg",
+      "Adler.jpg",
+      "Amano.jpg",
+      "Anthology.jpg",
+      "Capitol_Yards.jpg",
+      "Capstone_at_Vallagio.jpg",
+      "Corsair.jpg",
+      "FieldHouse_Townhomes.jpg",
+      "Filament.jpg",
+      "Fremont9.jpg",
+      "G12.jpg",
+      "GrandeVille_at_Greenwich.jpg",
+      "Grandridge_Place.jpg",
+      "Gunbarrel.jpg",
+      "Gunbarrel_Center.jpg",
+      "Halogen.jpg",
+      "Island_View.jpg",
+      "Legacy.jpg",
+      "Linea_Stillwater.jpg",
+      "LVB.jpg",
+      "Mosaic.jpg",
+      "Olive_DTLA.jpg",
+      "One_Observatory_Park.jpg",
+      "Palomino.jpg",
+      "Pike_Motorworks.jpg",
+      "Pine_Valley_Ranch.jpg",
+      "Portera_at_the_Grove.jpg",
+      "Revel_Eagle.jpg",
+      "Revel_Folsom.jpg",
+      "Revel_Issaquah.jpg",
+      "Revel_Lacey.jpg",
+      "Revel_Lodi.jpg",
+      "Revel_McDowell_Mountain.jpg",
+      "Revel_Palm_Desert.jpg",
+      "Revel_Province.jpg",
+      "Revel_Rancharrah.jpg",
+      "Revel_Scottsdale.jpg",
+      "Revel_Spokane.jpg",
+      "Revel_Vegas.jpg",
+      "Revere.jpg",
+      "Rivers_Edge.jpg",
+      "Sante.jpg",
+      "The_BLVD.jpg",
+      "The_Carter.jpg",
+      "The_Edison.jpg",
+      "The_Offset.jpg",
+      "The_Postmark.jpg",
+      "The_River_House.jpg",
+      "The_Whimsical_Pig.jpg",
+      "Three_Collective.jpg",
+      "Union_South_Bay.jpg",
+      "Vineyard_Commons.jpg"
+    ];
+
+    const builtInLogoSources = {
+      "logo/TWC_Icon_rgb_light.svg": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2259.6%22%20height%3D%2259.6%22%20viewBox%3D%220%200%2059.6%2059.6%22%3E%0D%0A%20%20%3Cdefs%3E%0D%0A%20%20%20%20%3Cstyle%3E%0D%0A%20%20%20%20%20%20.cls-1%20%7B%0D%0A%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%0D%0A%20%20%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20%20%20.cls-2%20%7B%0D%0A%20%20%20%20%20%20%20%20fill%3A%20%238fa0bb%3B%0D%0A%20%20%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20%20%20.cls-3%20%7B%0D%0A%20%20%20%20%20%20%20%20fill%3A%20%23c3cee1%3B%0D%0A%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%3C%2Fstyle%3E%0D%0A%20%20%3C%2Fdefs%3E%0D%0A%20%20%3Ctitle%3ETWC_Icon_rgb_light%3C%2Ftitle%3E%0D%0A%20%20%3Cg%20id%3D%22Layer_2%22%20data-name%3D%22Layer%202%22%3E%0D%0A%20%20%20%20%3Cg%20id%3D%22Layer_1-2%22%20data-name%3D%22Layer%201%22%3E%0D%0A%20%20%20%20%20%20%3Ccircle%20class%3D%22cls-1%22%20cx%3D%2229.8%22%20cy%3D%2229.8%22%20r%3D%2229.8%22%2F%3E%0D%0A%20%20%20%20%20%20%3Cg%3E%0D%0A%20%20%20%20%20%20%20%20%3Cpolygon%20class%3D%22cls-2%22%20points%3D%2252.8%2020.1%2046.5%2020.1%2036.7%2046%2042.8%2046%2052.8%2020.1%22%2F%3E%0D%0A%20%20%20%20%20%20%20%20%3Cpolygon%20class%3D%22cls-2%22%20points%3D%2232.9%2020.1%2026.7%2020.1%2016.8%2046%2022.9%2046%2032.9%2020.1%22%2F%3E%0D%0A%20%20%20%20%20%20%20%20%3Cpolygon%20class%3D%22cls-3%22%20points%3D%2226.7%2020.1%2032.9%2020.1%2042.8%2046%2036.7%2046%2026.7%2020.1%22%2F%3E%0D%0A%20%20%20%20%20%20%20%20%3Cpolygon%20class%3D%22cls-3%22%20points%3D%226.8%2020.1%2013.1%2020.1%2022.9%2046%2016.8%2046%206.8%2020.1%22%2F%3E%0D%0A%20%20%20%20%20%20%3C%2Fg%3E%0D%0A%20%20%20%20%3C%2Fg%3E%0D%0A%20%20%3C%2Fg%3E%0D%0A%3C%2Fsvg%3E%0D%0A",
+      "logo/revel.png": "logo/revel.png"
+    };
+
+    const brandPalettes = {
+      wolff: {
+        panelColor: [
+          { color: "#ffffff", label: "Wolff white" },
+          { color: "#f3f5f8", label: "Cool mist" },
+          { color: "#d2d9e3", label: "Blue gray tint" },
+          { color: "#8fa0bb", label: "Wolff blue gray" },
+          { color: "#1f2a37", label: "Deep corporate navy" }
+        ],
+        accentColor: [
+          { color: "#8fa0bb", label: "Wolff blue gray" },
+          { color: "#c3cee1", label: "Wolff light blue" },
+          { color: "#60789e", label: "Steel blue" },
+          { color: "#39404a", label: "Graphite blue" },
+          { color: "#bbaa8f", label: "Warm complement" }
+        ],
+        primaryTextColor: [
+          { color: "#17202a", label: "Ink" },
+          { color: "#39404a", label: "Graphite blue" },
+          { color: "#60789e", label: "Steel blue" },
+          { color: "#ffffff", label: "White" },
+          { color: "#c3cee1", label: "Wolff light blue" }
+        ],
+        secondaryTextColor: [
+          { color: "#566070", label: "Blue slate" },
+          { color: "#728095", label: "Muted steel" },
+          { color: "#8fa0bb", label: "Wolff blue gray" },
+          { color: "#ffffff", label: "White" },
+          { color: "#d2d9e3", label: "Pale blue gray" }
+        ],
+        defaults: {
+          panelColor: "#f3f5f8",
+          accentColor: "#8fa0bb",
+          primaryTextColor: "#17202a",
+          secondaryTextColor: "#566070"
+        }
+      },
+      revel: {
+        panelColor: [
+          { color: "#f7f1e8", label: "Warm hospitality cream" },
+          { color: "#ffffff", label: "White" },
+          { color: "#e6efec", label: "Soft sage" },
+          { color: "#d8e7e7", label: "Pale Revel teal" },
+          { color: "#005e67", label: "Deep Revel teal" }
+        ],
+        accentColor: [
+          { color: "#005e67", label: "Deep Revel teal" },
+          { color: "#147c8c", label: "Revel teal" },
+          { color: "#5aa6a5", label: "Resort aqua" },
+          { color: "#b7a077", label: "Warm gold" },
+          { color: "#8b6f4e", label: "Desert taupe" }
+        ],
+        primaryTextColor: [
+          { color: "#173033", label: "Teal ink" },
+          { color: "#005e67", label: "Deep Revel teal" },
+          { color: "#4d4036", label: "Warm charcoal" },
+          { color: "#ffffff", label: "White" },
+          { color: "#f7f1e8", label: "Warm cream" }
+        ],
+        secondaryTextColor: [
+          { color: "#5f675f", label: "Soft olive gray" },
+          { color: "#8b6f4e", label: "Desert taupe" },
+          { color: "#147c8c", label: "Revel teal" },
+          { color: "#ffffff", label: "White" },
+          { color: "#d8e7e7", label: "Pale teal" }
+        ],
+        defaults: {
+          panelColor: "#f7f1e8",
+          accentColor: "#005e67",
+          primaryTextColor: "#173033",
+          secondaryTextColor: "#5f675f"
+        }
+      }
+    };
+
+    const elements = {
+      canvas: document.getElementById("zoomCanvas"),
+      status: document.getElementById("status"),
+      controls: document.getElementById("controls"),
+      resetBtn: document.getElementById("resetBtn"),
+      downloadBtn: document.getElementById("downloadBtn"),
+      backgroundSelect: document.getElementById("backgroundSelect"),
+      backgroundUpload: document.getElementById("backgroundUpload"),
+      backgroundUploadField: document.getElementById("backgroundUploadField"),
+      logoSelect: document.getElementById("logoSelect"),
+      logoUpload: document.getElementById("logoUpload"),
+      logoUploadField: document.getElementById("logoUploadField"),
+      panelWidth: document.getElementById("panelWidth"),
+      logoSize: document.getElementById("logoSize"),
+      textScale: document.getElementById("textScale"),
+      panelWidthValue: document.getElementById("panelWidthValue"),
+      logoSizeValue: document.getElementById("logoSizeValue"),
+      textScaleValue: document.getElementById("textScaleValue")
+    };
+
+    const ctx = elements.canvas.getContext("2d");
+    let renderToken = 0;
+
+    function getSelectedBrand() {
+      if (elements.logoSelect.value === "logo/revel.png") {
+        activeBrand = "revel";
+      } else if (elements.logoSelect.value === "logo/TWC_Icon_rgb_light.svg") {
+        activeBrand = "wolff";
+      }
+
+      return activeBrand;
+    }
+
+    function buildSwatch(targetId, swatch) {
+      const button = document.createElement("button");
+      button.className = "swatch";
+      button.type = "button";
+      button.dataset.colorTarget = targetId;
+      button.dataset.color = swatch.color;
+      button.style.background = swatch.color;
+      button.title = swatch.label;
+      button.setAttribute("aria-label", `${swatch.label} ${swatch.color}`);
+      return button;
+    }
+
+    function updateBrandPalettes(applyDefaults = false) {
+      const palette = brandPalettes[getSelectedBrand()];
+      document.querySelectorAll("[data-palette-group]").forEach((group) => {
+        const targetId = group.dataset.paletteGroup;
+        group.replaceChildren(...palette[targetId].map((swatch) => buildSwatch(targetId, swatch)));
+
+        if (applyDefaults && palette.defaults[targetId]) {
+          document.getElementById(targetId).value = palette.defaults[targetId];
+        }
+      });
+    }
+
+    function communityNameFromFile(fileName) {
+      return fileName
+        .replace(/(\.(jpe?g|png|webp|gif|avif))+$/i, "")
+        .replace(/[_-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function populateCommunityOptions(files = communityFiles) {
+      const uniqueFiles = Array.from(new Set(files))
+        .filter((fileName) => /\.(jpe?g|png|webp|gif|avif)$/i.test(fileName))
+        .sort((first, second) => communityNameFromFile(first).localeCompare(communityNameFromFile(second)));
+
+      const options = uniqueFiles.map((fileName) => {
+        const option = document.createElement("option");
+        option.value = `communities/${fileName}`;
+        option.textContent = communityNameFromFile(fileName);
+        return option;
+      });
+
+      const customOption = document.createElement("option");
+      customOption.value = "custom";
+      customOption.textContent = "Upload custom community image";
+      options.push(customOption);
+
+      elements.backgroundSelect.replaceChildren(...options);
+    }
+
+    async function discoverCommunityFiles() {
+      try {
+        const response = await fetch("communities/", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error("No directory listing available.");
+        }
+
+        const html = await response.text();
+        const documentFragment = new DOMParser().parseFromString(html, "text/html");
+        const discoveredFiles = Array.from(documentFragment.querySelectorAll("a"))
+          .map((link) => decodeURIComponent(link.getAttribute("href") || ""))
+          .map((href) => href.split("/").filter(Boolean).pop() || "")
+          .filter((fileName) => /\.(jpe?g|png|webp|gif|avif)$/i.test(fileName));
+
+        if (discoveredFiles.length) {
+          populateCommunityOptions(discoveredFiles);
+          return;
+        }
+      } catch (error) {
+        // Direct file opens cannot enumerate folders; the static list remains the fallback.
+      }
+
+      populateCommunityOptions();
+    }
+
+    function fieldValue(id) {
+      const field = document.getElementById(id);
+      return field.type === "checkbox" ? field.checked : field.value;
+    }
+
+    function getState() {
+      const backgroundValue = fieldValue("backgroundSelect");
+      const logoValue = fieldValue("logoSelect");
+
+      return {
+        backgroundSource: backgroundValue === "custom" ? customImages.background : backgroundValue,
+        logoSource: logoValue === "custom" ? customImages.logo : builtInLogoSources[logoValue],
+        panelColor: fieldValue("panelColor"),
+        accentColor: fieldValue("accentColor"),
+        personName: fieldValue("personName").trim(),
+        personTitle: fieldValue("personTitle").trim(),
+        personEmail: fieldValue("personEmail").trim(),
+        personPhone: fieldValue("personPhone").trim(),
+        primaryTextColor: fieldValue("primaryTextColor"),
+        secondaryTextColor: fieldValue("secondaryTextColor"),
+        panelWidth: Number(fieldValue("panelWidth")),
+        logoSize: Number(fieldValue("logoSize")),
+        textScale: Number(fieldValue("textScale")) / 100,
+        showGuides: fieldValue("showGuides")
+      };
+    }
+
+    function setStatus(message) {
+      elements.status.textContent = message || "";
+    }
+
+    function updateLabels() {
+      elements.panelWidthValue.textContent = elements.panelWidth.value;
+      elements.logoSizeValue.textContent = elements.logoSize.value;
+      elements.textScaleValue.textContent = elements.textScale.value;
+      elements.backgroundUploadField.hidden = elements.backgroundSelect.value !== "custom";
+      elements.logoUploadField.hidden = elements.logoSelect.value !== "custom";
+    }
+
+    function loadImage(source) {
+      if (!source) {
+        return Promise.resolve(null);
+      }
+
+      if (imageCache.has(source)) {
+        return imageCache.get(source);
+      }
+
+      const promise = new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error(`Unable to load ${source}`));
+        image.src = source;
+      });
+
+      imageCache.set(source, promise);
+      return promise;
+    }
+
+    function drawCover(targetCtx, image, x, y, width, height) {
+      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+      const scaledWidth = image.naturalWidth * scale;
+      const scaledHeight = image.naturalHeight * scale;
+      const sourceX = (scaledWidth - width) / 2 / scale;
+      const sourceY = (scaledHeight - height) / 2 / scale;
+      const sourceWidth = width / scale;
+      const sourceHeight = height / scale;
+      targetCtx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+    }
+
+    function fitText(targetCtx, text, x, y, maxWidth, baseSize, family, weight, color) {
+      if (!text) {
+        return y;
+      }
+
+      let size = baseSize;
+      targetCtx.font = `${weight} ${size}px ${family}`;
+      while (targetCtx.measureText(text).width > maxWidth && size > 13) {
+        size -= 1;
+        targetCtx.font = `${weight} ${size}px ${family}`;
+      }
+
+      targetCtx.fillStyle = color;
+      targetCtx.fillText(text, x, y);
+      return y + Math.round(size * 1.34);
+    }
+
+    function drawGuides(targetCtx, panelWidth) {
+      targetCtx.save();
+      targetCtx.setLineDash([9, 9]);
+      targetCtx.lineWidth = 2;
+      targetCtx.strokeStyle = "rgba(255,255,255,0.78)";
+      targetCtx.strokeRect(42, 42, CANVAS_WIDTH - 84, CANVAS_HEIGHT - 84);
+      targetCtx.strokeStyle = "rgba(20,124,140,0.85)";
+      targetCtx.beginPath();
+      targetCtx.moveTo(panelWidth, 0);
+      targetCtx.lineTo(panelWidth, CANVAS_HEIGHT);
+      targetCtx.stroke();
+      targetCtx.restore();
+    }
+
+    async function drawCanvas(targetCanvas, includeGuides = true) {
+      updateLabels();
+      const state = getState();
+      const targetCtx = targetCanvas.getContext("2d");
+
+      const [background, logo] = await Promise.all([
+        loadImage(state.backgroundSource),
+        loadImage(state.logoSource)
+      ]);
+
+      targetCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      if (background) {
+        drawCover(targetCtx, background, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      } else {
+        targetCtx.fillStyle = "#cfd8df";
+        targetCtx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        setStatus("Upload a community image.");
+      }
+
+      const gradient = targetCtx.createLinearGradient(state.panelWidth, 0, state.panelWidth + 240, 0);
+      gradient.addColorStop(0, "rgba(0,0,0,0.24)");
+      gradient.addColorStop(1, "rgba(0,0,0,0)");
+      targetCtx.fillStyle = gradient;
+      targetCtx.fillRect(state.panelWidth, 0, 240, CANVAS_HEIGHT);
+
+      targetCtx.fillStyle = state.panelColor;
+      targetCtx.fillRect(0, 0, state.panelWidth, CANVAS_HEIGHT);
+
+      targetCtx.fillStyle = state.accentColor;
+      targetCtx.fillRect(state.panelWidth - 8, 0, 8, CANVAS_HEIGHT);
+
+      if (logo) {
+        const logoMaxWidth = state.panelWidth - 76;
+        const logoMaxHeight = state.logoSize;
+        const logoScale = Math.min(logoMaxWidth / logo.naturalWidth, logoMaxHeight / logo.naturalHeight);
+        const logoWidth = logo.naturalWidth * logoScale;
+        const logoHeight = logo.naturalHeight * logoScale;
+        targetCtx.drawImage(logo, (state.panelWidth - logoWidth) / 2, 96 + (logoMaxHeight - logoHeight) / 2, logoWidth, logoHeight);
+      } else {
+        setStatus("Upload a logo image.");
+      }
+
+      const textX = 48;
+      const maxTextWidth = state.panelWidth - 96;
+      const textBaseY = 344;
+      const family = "Inter, Arial, sans-serif";
+
+      targetCtx.textAlign = "left";
+      targetCtx.textBaseline = "top";
+
+      let y = textBaseY;
+      y = fitText(targetCtx, state.personName || "Name", textX, y, maxTextWidth, Math.round(36 * state.textScale), family, "800", state.primaryTextColor);
+      y += 6;
+      y = fitText(targetCtx, state.personTitle || "Title", textX, y, maxTextWidth, Math.round(22 * state.textScale), family, "650", state.secondaryTextColor);
+
+      targetCtx.fillStyle = state.accentColor;
+      targetCtx.fillRect(textX, y + 18, 72, 4);
+
+      y += 54;
+      y = fitText(targetCtx, state.personEmail || "email@example.com", textX, y, maxTextWidth, Math.round(20 * state.textScale), family, "650", state.primaryTextColor);
+      y += 2;
+      fitText(targetCtx, state.personPhone || "(555) 000-0000", textX, y, maxTextWidth, Math.round(20 * state.textScale), family, "650", state.primaryTextColor);
+
+      if (includeGuides && state.showGuides) {
+        drawGuides(targetCtx, state.panelWidth);
+      }
+    }
+
+    async function render(includeGuides = true) {
+      const token = ++renderToken;
+      setStatus("");
+
+      try {
+        await drawCanvas(elements.canvas, includeGuides);
+        if (token !== renderToken) {
+          return;
+        }
+      } catch (error) {
+        setStatus(error.message);
+      }
+    }
+
+    function canvasToBlob(canvas) {
+      return new Promise((resolve, reject) => {
+        if (canvas.toBlob) {
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error("Could not create PNG."));
+            }
+          }, "image/png");
+          return;
+        }
+
+        try {
+          const dataUrl = canvas.toDataURL("image/png");
+          const byteString = atob(dataUrl.split(",")[1]);
+          const bytes = new Uint8Array(byteString.length);
+          for (let index = 0; index < byteString.length; index += 1) {
+            bytes[index] = byteString.charCodeAt(index);
+          }
+          resolve(new Blob([bytes], { type: "image/png" }));
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+
+    function handleUpload(input, key) {
+      const file = input.files && input.files[0];
+      if (!file) {
+        customImages[key] = "";
+        render();
+        return;
+      }
+
+      if (!file.type.startsWith("image/")) {
+        setStatus("Choose an image file.");
+        input.value = "";
+        return;
+      }
+
+      if (customImages[key]) {
+        URL.revokeObjectURL(customImages[key]);
+      }
+
+      customImages[key] = URL.createObjectURL(file);
+      render();
+    }
+
+    async function resetForm() {
+      Object.entries(defaults).forEach(([id, value]) => {
+        const field = document.getElementById(id);
+        if (!field) {
+          return;
+        }
+        if (field.type === "checkbox") {
+          field.checked = value;
+        } else {
+          field.value = value;
+        }
+      });
+
+      elements.backgroundUpload.value = "";
+      elements.logoUpload.value = "";
+      Object.values(customImages).forEach((source) => {
+        if (source) {
+          URL.revokeObjectURL(source);
+        }
+      });
+      customImages.background = "";
+      customImages.logo = "";
+      await discoverCommunityFiles();
+      updateBrandPalettes(true);
+      render();
+    }
+
+    elements.logoSelect.addEventListener("change", () => {
+      updateBrandPalettes(elements.logoSelect.value !== "custom");
+    });
+    elements.controls.addEventListener("input", () => render());
+    elements.controls.addEventListener("change", () => render());
+    elements.controls.addEventListener("click", (event) => {
+      const swatch = event.target.closest("[data-color-target]");
+      if (!swatch) {
+        return;
+      }
+
+      const target = document.getElementById(swatch.dataset.colorTarget);
+      if (!target) {
+        return;
+      }
+
+      target.value = swatch.dataset.color;
+      render();
+    });
+    elements.backgroundUpload.addEventListener("change", () => handleUpload(elements.backgroundUpload, "background"));
+    elements.logoUpload.addEventListener("change", () => handleUpload(elements.logoUpload, "logo"));
+    elements.resetBtn.addEventListener("click", resetForm);
+    elements.downloadBtn.addEventListener("click", async () => {
+      try {
+        const exportCanvas = document.createElement("canvas");
+        exportCanvas.width = CANVAS_WIDTH;
+        exportCanvas.height = CANVAS_HEIGHT;
+        await drawCanvas(exportCanvas, false);
+        const blob = await canvasToBlob(exportCanvas);
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = "zoom-background.png";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        render();
+      } catch (error) {
+        if ((error.message || "").includes("Tainted canvases")) {
+          setStatus("Start a local web server from the zoom folder, then open the localhost page to download.");
+          return;
+        }
+        setStatus(error.message || "Could not download Zoom background.");
+      }
+    });
+
+    async function init() {
+      await discoverCommunityFiles();
+      updateBrandPalettes(true);
+      render();
+    }
+
+    init();
+  </script>
+</body>
+</html>
