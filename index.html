@@ -261,6 +261,12 @@
       line-height: 1.4;
     }
 
+    .inline-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .preview-panel {
       padding: 16px;
       position: sticky;
@@ -361,6 +367,16 @@
             <div class="field" id="backgroundUploadField" hidden>
               <label for="backgroundUpload">Custom community image</label>
               <input id="backgroundUpload" type="file" accept="image/*">
+            </div>
+            <div class="field">
+              <label>Community image position</label>
+              <div class="inline-actions">
+                <button class="button secondary" id="adjustBackgroundBtn" type="button">Adjust position</button>
+                <button class="button" id="setBackgroundPositionBtn" type="button" hidden>Set position</button>
+              </div>
+              <label for="backgroundOffsetX" id="backgroundOffsetXLabel">Horizontal offset <span id="backgroundOffsetXValue">0</span>px</label>
+              <input id="backgroundOffsetX" type="range" min="0" max="0" step="1" value="0" hidden>
+              <p class="hint" id="backgroundPositionHint">Center by default. Use Adjust position to pan horizontally, then Set position to lock.</p>
             </div>
             <div class="field">
               <label for="logoSelect">Logo</label>
@@ -475,6 +491,7 @@
       panelWidth: "360",
       logoSize: "170",
       textScale: "100",
+      backgroundOffsetX: "0",
       showGuides: false
     };
 
@@ -638,11 +655,18 @@
       textScale: document.getElementById("textScale"),
       panelWidthValue: document.getElementById("panelWidthValue"),
       logoSizeValue: document.getElementById("logoSizeValue"),
-      textScaleValue: document.getElementById("textScaleValue")
+      textScaleValue: document.getElementById("textScaleValue"),
+      adjustBackgroundBtn: document.getElementById("adjustBackgroundBtn"),
+      setBackgroundPositionBtn: document.getElementById("setBackgroundPositionBtn"),
+      backgroundOffsetX: document.getElementById("backgroundOffsetX"),
+      backgroundPositionHint: document.getElementById("backgroundPositionHint"),
+      backgroundOffsetXValue: document.getElementById("backgroundOffsetXValue"),
+      backgroundOffsetXLabel: document.getElementById("backgroundOffsetXLabel")
     };
 
     const ctx = elements.canvas.getContext("2d");
     let renderToken = 0;
+    let backgroundAdjustMode = false;
 
     function getSelectedBrand() {
       if (elements.logoSelect.value === "logo/revel.png") {
@@ -754,6 +778,7 @@
         panelWidth: Number(fieldValue("panelWidth")),
         logoSize: Number(fieldValue("logoSize")),
         textScale: Number(fieldValue("textScale")) / 100,
+        backgroundOffsetX: Number(fieldValue("backgroundOffsetX")),
         showGuides: fieldValue("showGuides")
       };
     }
@@ -768,6 +793,14 @@
       elements.textScaleValue.textContent = elements.textScale.value;
       elements.backgroundUploadField.hidden = elements.backgroundSelect.value !== "custom";
       elements.logoUploadField.hidden = elements.logoSelect.value !== "custom";
+      elements.backgroundOffsetX.hidden = !backgroundAdjustMode;
+      elements.backgroundOffsetXLabel.hidden = !backgroundAdjustMode;
+      elements.backgroundOffsetXValue.textContent = elements.backgroundOffsetX.value;
+      elements.setBackgroundPositionBtn.hidden = !backgroundAdjustMode;
+      elements.adjustBackgroundBtn.textContent = backgroundAdjustMode ? "Cancel adjust" : "Adjust position";
+      elements.backgroundPositionHint.textContent = backgroundAdjustMode
+        ? `Set a horizontal offset between ${elements.backgroundOffsetX.min}px and ${elements.backgroundOffsetX.max}px, then choose Set position.`
+        : "Offset is calibrated at 0px for a newly selected community image.";
     }
 
     function loadImage(source) {
@@ -790,15 +823,13 @@
       return promise;
     }
 
-    function drawCover(targetCtx, image, x, y, width, height) {
-      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
-      const scaledWidth = image.naturalWidth * scale;
-      const scaledHeight = image.naturalHeight * scale;
-      const sourceX = (scaledWidth - width) / 2 / scale;
-      const sourceY = (scaledHeight - height) / 2 / scale;
-      const sourceWidth = width / scale;
-      const sourceHeight = height / scale;
-      targetCtx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+    function drawCover(targetCtx, image, x, y, width, height, offsetXPx = 0) {
+      const scale = height / image.naturalHeight;
+      const drawWidth = image.naturalWidth * scale;
+      const maxOffset = Math.max(0, (drawWidth - width) / 2);
+      const clampedOffset = Math.max(-maxOffset, Math.min(maxOffset, offsetXPx));
+      const drawX = x + (width - drawWidth) / 2 + clampedOffset;
+      targetCtx.drawImage(image, drawX, y, drawWidth, height);
     }
 
     function fitText(targetCtx, text, x, y, maxWidth, baseSize, family, weight, color) {
@@ -832,6 +863,28 @@
       targetCtx.restore();
     }
 
+
+    async function syncBackgroundOffsetBounds() {
+      const state = getState();
+      const background = await loadImage(state.backgroundSource);
+      if (!background) {
+        elements.backgroundOffsetX.min = "0";
+        elements.backgroundOffsetX.max = "0";
+        elements.backgroundOffsetX.value = "0";
+        return;
+      }
+
+      const scale = CANVAS_HEIGHT / background.naturalHeight;
+      const drawWidth = background.naturalWidth * scale;
+      const maxOffset = Math.round(Math.max(0, (drawWidth - CANVAS_WIDTH) / 2));
+      elements.backgroundOffsetX.min = String(-maxOffset);
+      elements.backgroundOffsetX.max = String(maxOffset);
+
+      const current = Number(elements.backgroundOffsetX.value);
+      const clamped = Math.max(-maxOffset, Math.min(maxOffset, current));
+      elements.backgroundOffsetX.value = String(clamped);
+    }
+
     async function drawCanvas(targetCanvas, includeGuides = true) {
       updateLabels();
       const state = getState();
@@ -845,7 +898,7 @@
       targetCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
       if (background) {
-        drawCover(targetCtx, background, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        drawCover(targetCtx, background, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, state.backgroundOffsetX);
       } else {
         targetCtx.fillStyle = "#cfd8df";
         targetCtx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -961,6 +1014,14 @@
       }
 
       customImages[key] = URL.createObjectURL(file);
+      if (key === "background") {
+        elements.backgroundOffsetX.value = "0";
+        syncBackgroundOffsetBounds().then(() => {
+          updateLabels();
+          render();
+        });
+        return;
+      }
       render();
     }
 
@@ -986,13 +1047,21 @@
       });
       customImages.background = "";
       customImages.logo = "";
+      backgroundAdjustMode = false;
       await discoverCommunityFiles();
+      await syncBackgroundOffsetBounds();
       updateBrandPalettes(true);
       render();
     }
 
     elements.logoSelect.addEventListener("change", () => {
       updateBrandPalettes(elements.logoSelect.value !== "custom");
+    });
+    elements.backgroundSelect.addEventListener("change", async () => {
+      elements.backgroundOffsetX.value = "0";
+      await syncBackgroundOffsetBounds();
+      updateLabels();
+      render();
     });
     elements.controls.addEventListener("input", () => render());
     elements.controls.addEventListener("change", () => render());
@@ -1008,6 +1077,16 @@
       }
 
       target.value = swatch.dataset.color;
+      render();
+    });
+    elements.adjustBackgroundBtn.addEventListener("click", () => {
+      backgroundAdjustMode = !backgroundAdjustMode;
+      updateLabels();
+      render();
+    });
+    elements.setBackgroundPositionBtn.addEventListener("click", () => {
+      backgroundAdjustMode = false;
+      updateLabels();
       render();
     });
     elements.backgroundUpload.addEventListener("change", () => handleUpload(elements.backgroundUpload, "background"));
@@ -1039,7 +1118,9 @@
     });
 
     async function init() {
+      backgroundAdjustMode = false;
       await discoverCommunityFiles();
+      await syncBackgroundOffsetBounds();
       updateBrandPalettes(true);
       render();
     }
