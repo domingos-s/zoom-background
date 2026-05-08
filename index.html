@@ -475,6 +475,7 @@
   <script>
     const CANVAS_WIDTH = 1280;
     const CANVAS_HEIGHT = 720;
+    const BACKGROUND_PAN_ZOOM = 1.12;
 
     const defaults = {
       backgroundSelect: "communities/4730_California.jpg",
@@ -819,7 +820,7 @@
     }
 
     function drawCover(targetCtx, image, x, y, width, height, offsetXRatio = 0.5) {
-      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight) * BACKGROUND_PAN_ZOOM;
       const sourceWidth = width / scale;
       const sourceHeight = height / scale;
       const maxSourceX = Math.max(0, image.naturalWidth - sourceWidth);
