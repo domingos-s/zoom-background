@@ -374,7 +374,8 @@
                 <button class="button secondary" id="adjustBackgroundBtn" type="button">Adjust position</button>
                 <button class="button" id="setBackgroundPositionBtn" type="button" hidden>Set position</button>
               </div>
-              <input id="backgroundOffsetX" type="number" min="0" max="0" step="10" value="0" hidden>
+              <label for="backgroundOffsetX" id="backgroundOffsetXLabel">Horizontal offset <span id="backgroundOffsetXValue">0</span>px</label>
+              <input id="backgroundOffsetX" type="range" min="0" max="0" step="1" value="0" hidden>
               <p class="hint" id="backgroundPositionHint">Center by default. Use Adjust position to pan horizontally, then Set position to lock.</p>
             </div>
             <div class="field">
@@ -659,7 +660,9 @@
       adjustBackgroundBtn: document.getElementById("adjustBackgroundBtn"),
       setBackgroundPositionBtn: document.getElementById("setBackgroundPositionBtn"),
       backgroundOffsetX: document.getElementById("backgroundOffsetX"),
-      backgroundPositionHint: document.getElementById("backgroundPositionHint")
+      backgroundPositionHint: document.getElementById("backgroundPositionHint"),
+      backgroundOffsetXValue: document.getElementById("backgroundOffsetXValue"),
+      backgroundOffsetXLabel: document.getElementById("backgroundOffsetXLabel")
     };
 
     const ctx = elements.canvas.getContext("2d");
@@ -792,6 +795,8 @@
       elements.backgroundUploadField.hidden = elements.backgroundSelect.value !== "custom";
       elements.logoUploadField.hidden = elements.logoSelect.value !== "custom";
       elements.backgroundOffsetX.hidden = !backgroundAdjustMode;
+      elements.backgroundOffsetXLabel.hidden = !backgroundAdjustMode;
+      elements.backgroundOffsetXValue.textContent = elements.backgroundOffsetX.value;
       elements.setBackgroundPositionBtn.hidden = !backgroundAdjustMode;
       elements.adjustBackgroundBtn.textContent = backgroundAdjustMode ? "Cancel adjust" : "Adjust position";
       elements.backgroundPositionHint.textContent = backgroundAdjustMode
