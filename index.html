@@ -261,6 +261,12 @@
       line-height: 1.4;
     }
 
+    .inline-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .preview-panel {
       padding: 16px;
       position: sticky;
@@ -363,6 +369,15 @@
               <input id="backgroundUpload" type="file" accept="image/*">
             </div>
             <div class="field">
+              <label>Community image position</label>
+              <div class="inline-actions">
+                <button class="button secondary" id="adjustBackgroundBtn" type="button">Adjust position</button>
+                <button class="button" id="setBackgroundPositionBtn" type="button" hidden>Set position</button>
+              </div>
+              <input id="backgroundOffsetX" type="range" min="0" max="100" step="1" value="50" hidden>
+              <p class="hint" id="backgroundPositionHint">Center by default. Use Adjust position to pan horizontally, then Set position to lock.</p>
+            </div>
+            <div class="field">
               <label for="logoSelect">Logo</label>
               <select id="logoSelect">
                 <option value="logo/TWC_Icon_rgb_light.svg">The Wolff Company</option>
@@ -460,6 +475,7 @@
   <script>
     const CANVAS_WIDTH = 1280;
     const CANVAS_HEIGHT = 720;
+    const BACKGROUND_PAN_ZOOM = 1.12;
 
     const defaults = {
       backgroundSelect: "communities/4730_California.jpg",
@@ -475,6 +491,7 @@
       panelWidth: "360",
       logoSize: "170",
       textScale: "100",
+      backgroundOffsetX: "50",
       showGuides: false
     };
 
@@ -638,11 +655,16 @@
       textScale: document.getElementById("textScale"),
       panelWidthValue: document.getElementById("panelWidthValue"),
       logoSizeValue: document.getElementById("logoSizeValue"),
-      textScaleValue: document.getElementById("textScaleValue")
+      textScaleValue: document.getElementById("textScaleValue"),
+      adjustBackgroundBtn: document.getElementById("adjustBackgroundBtn"),
+      setBackgroundPositionBtn: document.getElementById("setBackgroundPositionBtn"),
+      backgroundOffsetX: document.getElementById("backgroundOffsetX"),
+      backgroundPositionHint: document.getElementById("backgroundPositionHint")
     };
 
     const ctx = elements.canvas.getContext("2d");
     let renderToken = 0;
+    let backgroundAdjustMode = false;
 
     function getSelectedBrand() {
       if (elements.logoSelect.value === "logo/revel.png") {
@@ -754,6 +776,7 @@
         panelWidth: Number(fieldValue("panelWidth")),
         logoSize: Number(fieldValue("logoSize")),
         textScale: Number(fieldValue("textScale")) / 100,
+        backgroundOffsetX: Number(fieldValue("backgroundOffsetX")) / 100,
         showGuides: fieldValue("showGuides")
       };
     }
@@ -768,6 +791,12 @@
       elements.textScaleValue.textContent = elements.textScale.value;
       elements.backgroundUploadField.hidden = elements.backgroundSelect.value !== "custom";
       elements.logoUploadField.hidden = elements.logoSelect.value !== "custom";
+      elements.backgroundOffsetX.hidden = !backgroundAdjustMode;
+      elements.setBackgroundPositionBtn.hidden = !backgroundAdjustMode;
+      elements.adjustBackgroundBtn.textContent = backgroundAdjustMode ? "Cancel adjust" : "Adjust position";
+      elements.backgroundPositionHint.textContent = backgroundAdjustMode
+        ? "Move the slider to pan the community image horizontally, then choose Set position."
+        : "Center by default. Use Adjust position to pan horizontally, then Set position to lock.";
     }
 
     function loadImage(source) {
@@ -790,14 +819,15 @@
       return promise;
     }
 
-    function drawCover(targetCtx, image, x, y, width, height) {
-      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
-      const scaledWidth = image.naturalWidth * scale;
-      const scaledHeight = image.naturalHeight * scale;
-      const sourceX = (scaledWidth - width) / 2 / scale;
-      const sourceY = (scaledHeight - height) / 2 / scale;
+    function drawCover(targetCtx, image, x, y, width, height, offsetXRatio = 0.5) {
+      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight) * BACKGROUND_PAN_ZOOM;
       const sourceWidth = width / scale;
       const sourceHeight = height / scale;
+      const maxSourceX = Math.max(0, image.naturalWidth - sourceWidth);
+      const maxSourceY = Math.max(0, image.naturalHeight - sourceHeight);
+      const clampedOffset = Math.min(1, Math.max(0, offsetXRatio));
+      const sourceX = maxSourceX * clampedOffset;
+      const sourceY = maxSourceY / 2;
       targetCtx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
     }
 
@@ -845,7 +875,7 @@
       targetCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
       if (background) {
-        drawCover(targetCtx, background, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        drawCover(targetCtx, background, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, state.backgroundOffsetX);
       } else {
         targetCtx.fillStyle = "#cfd8df";
         targetCtx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -986,6 +1016,7 @@
       });
       customImages.background = "";
       customImages.logo = "";
+      backgroundAdjustMode = false;
       await discoverCommunityFiles();
       updateBrandPalettes(true);
       render();
@@ -1008,6 +1039,16 @@
       }
 
       target.value = swatch.dataset.color;
+      render();
+    });
+    elements.adjustBackgroundBtn.addEventListener("click", () => {
+      backgroundAdjustMode = !backgroundAdjustMode;
+      updateLabels();
+      render();
+    });
+    elements.setBackgroundPositionBtn.addEventListener("click", () => {
+      backgroundAdjustMode = false;
+      updateLabels();
       render();
     });
     elements.backgroundUpload.addEventListener("change", () => handleUpload(elements.backgroundUpload, "background"));
@@ -1039,6 +1080,7 @@
     });
 
     async function init() {
+      backgroundAdjustMode = false;
       await discoverCommunityFiles();
       updateBrandPalettes(true);
       render();
