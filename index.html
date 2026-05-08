@@ -394,19 +394,19 @@
           <div class="panel-body">
             <div class="field">
               <label for="personName">Name</label>
-              <input id="personName" type="text" value="Jane Santos" autocomplete="name">
+              <input id="personName" type="text" value="John Q. Sample" autocomplete="name">
             </div>
             <div class="field">
               <label for="personTitle">Title</label>
-              <input id="personTitle" type="text" value="Regional Director" autocomplete="organization-title">
+              <input id="personTitle" type="text" value="" autocomplete="organization-title">
             </div>
             <div class="field">
               <label for="personEmail">Email</label>
-              <input id="personEmail" type="email" value="jane.santos@example.com" autocomplete="email">
+              <input id="personEmail" type="email" value="john@sample.com" autocomplete="email">
             </div>
             <div class="field">
               <label for="personPhone">Phone</label>
-              <input id="personPhone" type="tel" value="(555) 014-2026" autocomplete="tel">
+              <input id="personPhone" type="tel" value="(123) 456-7890" autocomplete="tel">
             </div>
             <div class="field">
               <label for="primaryTextColor">Name and contact color</label>
@@ -886,15 +886,15 @@
       let y = textBaseY;
       y = fitText(targetCtx, state.personName || "Name", textX, y, maxTextWidth, Math.round(36 * state.textScale), family, "800", state.primaryTextColor);
       y += 6;
-      y = fitText(targetCtx, state.personTitle || "Title", textX, y, maxTextWidth, Math.round(22 * state.textScale), family, "650", state.secondaryTextColor);
+      y = fitText(targetCtx, state.personTitle, textX, y, maxTextWidth, Math.round(22 * state.textScale), family, "650", state.secondaryTextColor);
 
       targetCtx.fillStyle = state.accentColor;
       targetCtx.fillRect(textX, y + 18, 72, 4);
 
       y += 54;
-      y = fitText(targetCtx, state.personEmail || "email@example.com", textX, y, maxTextWidth, Math.round(20 * state.textScale), family, "650", state.primaryTextColor);
+      y = fitText(targetCtx, state.personEmail, textX, y, maxTextWidth, Math.round(20 * state.textScale), family, "650", state.primaryTextColor);
       y += 2;
-      fitText(targetCtx, state.personPhone || "(555) 000-0000", textX, y, maxTextWidth, Math.round(20 * state.textScale), family, "650", state.primaryTextColor);
+      fitText(targetCtx, state.personPhone, textX, y, maxTextWidth, Math.round(20 * state.textScale), family, "650", state.primaryTextColor);
 
       if (includeGuides && state.showGuides) {
         drawGuides(targetCtx, state.panelWidth);
