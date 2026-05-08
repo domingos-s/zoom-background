@@ -375,7 +375,7 @@
                 <button class="button" id="setBackgroundPositionBtn" type="button" hidden>Set position</button>
               </div>
               <label for="backgroundOffsetX" id="backgroundOffsetXLabel">Horizontal offset <span id="backgroundOffsetXValue">0</span>px</label>
-              <input id="backgroundOffsetX" type="range" min="0" max="0" step="1" value="0" hidden>
+              <input id="backgroundOffsetX" type="range" min="-640" max="640" step="1" value="0" hidden>
               <p class="hint" id="backgroundPositionHint">Center by default. Use Adjust position to pan horizontally, then Set position to lock.</p>
             </div>
             <div class="field">
@@ -476,7 +476,7 @@
   <script>
     const CANVAS_WIDTH = 1280;
     const CANVAS_HEIGHT = 720;
-    const BACKGROUND_PAN_ZOOM = 2.00;
+    const BACKGROUND_OFFSET_LIMIT = 640;
 
     const defaults = {
       backgroundSelect: "communities/4730_California.jpg",
@@ -827,8 +827,7 @@
     function drawCover(targetCtx, image, x, y, width, height, offsetXPx = 0) {
       const scale = height / image.naturalHeight;
       const drawWidth = image.naturalWidth * scale;
-      const maxOffset = Math.max(0, (drawWidth - width) / 2);
-      const clampedOffset = Math.max(-maxOffset, Math.min(maxOffset, offsetXPx));
+      const clampedOffset = Math.max(-BACKGROUND_OFFSET_LIMIT, Math.min(BACKGROUND_OFFSET_LIMIT, offsetXPx));
       const drawX = x + (width - drawWidth) / 2 + clampedOffset;
       targetCtx.drawImage(image, drawX, y, drawWidth, height);
     }
@@ -875,14 +874,11 @@
         return;
       }
 
-      const scale = CANVAS_HEIGHT / background.naturalHeight;
-      const drawWidth = background.naturalWidth * scale;
-      const maxOffset = Math.round(Math.max(0, (drawWidth - CANVAS_WIDTH) / 2));
-      elements.backgroundOffsetX.min = String(-maxOffset);
-      elements.backgroundOffsetX.max = String(maxOffset);
+      elements.backgroundOffsetX.min = String(-BACKGROUND_OFFSET_LIMIT);
+      elements.backgroundOffsetX.max = String(BACKGROUND_OFFSET_LIMIT);
 
       const current = Number(elements.backgroundOffsetX.value);
-      const clamped = Math.max(-maxOffset, Math.min(maxOffset, current));
+      const clamped = Math.max(-BACKGROUND_OFFSET_LIMIT, Math.min(BACKGROUND_OFFSET_LIMIT, current));
       elements.backgroundOffsetX.value = String(clamped);
     }
 
