@@ -384,6 +384,7 @@
                 <option value="logo/TWC_Icon_rgb_light.svg">The Wolff Company</option>
                 <option value="logo/revel.png">Revel Communities</option>
                 <option value="logo/parse_logo.svg">Parse Capital</option>
+                <option value="logo/CentennialMortgage.webp">Centennial Mortgage</option>
                 <option value="custom">Upload custom logo</option>
               </select>
             </div>
@@ -563,7 +564,8 @@
     const builtInLogoSources = {
       "logo/TWC_Icon_rgb_light.svg": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2259.6%22%20height%3D%2259.6%22%20viewBox%3D%220%200%2059.6%2059.6%22%3E%0D%0A%20%20%3Cdefs%3E%0D%0A%20%20%20%20%3Cstyle%3E%0D%0A%20%20%20%20%20%20.cls-1%20%7B%0D%0A%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%0D%0A%20%20%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20%20%20.cls-2%20%7B%0D%0A%20%20%20%20%20%20%20%20fill%3A%20%238fa0bb%3B%0D%0A%20%20%20%20%20%20%7D%0D%0A%0D%0A%20%20%20%20%20%20.cls-3%20%7B%0D%0A%20%20%20%20%20%20%20%20fill%3A%20%23c3cee1%3B%0D%0A%20%20%20%20%20%20%7D%0D%0A%20%20%20%20%3C%2Fstyle%3E%0D%0A%20%20%3C%2Fdefs%3E%0D%0A%20%20%3Ctitle%3ETWC_Icon_rgb_light%3C%2Ftitle%3E%0D%0A%20%20%3Cg%20id%3D%22Layer_2%22%20data-name%3D%22Layer%202%22%3E%0D%0A%20%20%20%20%3Cg%20id%3D%22Layer_1-2%22%20data-name%3D%22Layer%201%22%3E%0D%0A%20%20%20%20%20%20%3Ccircle%20class%3D%22cls-1%22%20cx%3D%2229.8%22%20cy%3D%2229.8%22%20r%3D%2229.8%22%2F%3E%0D%0A%20%20%20%20%20%20%3Cg%3E%0D%0A%20%20%20%20%20%20%20%20%3Cpolygon%20class%3D%22cls-2%22%20points%3D%2252.8%2020.1%2046.5%2020.1%2036.7%2046%2042.8%2046%2052.8%2020.1%22%2F%3E%0D%0A%20%20%20%20%20%20%20%20%3Cpolygon%20class%3D%22cls-2%22%20points%3D%2232.9%2020.1%2026.7%2020.1%2016.8%2046%2022.9%2046%2032.9%2020.1%22%2F%3E%0D%0A%20%20%20%20%20%20%20%20%3Cpolygon%20class%3D%22cls-3%22%20points%3D%2226.7%2020.1%2032.9%2020.1%2042.8%2046%2036.7%2046%2026.7%2020.1%22%2F%3E%0D%0A%20%20%20%20%20%20%20%20%3Cpolygon%20class%3D%22cls-3%22%20points%3D%226.8%2020.1%2013.1%2020.1%2022.9%2046%2016.8%2046%206.8%2020.1%22%2F%3E%0D%0A%20%20%20%20%20%20%3C%2Fg%3E%0D%0A%20%20%20%20%3C%2Fg%3E%0D%0A%20%20%3C%2Fg%3E%0D%0A%3C%2Fsvg%3E%0D%0A",
       "logo/revel.png": "logo/revel.png",
-      "logo/parse_logo.svg": "logo/parse_logo.svg"
+      "logo/parse_logo.svg": "logo/parse_logo.svg",
+      "logo/CentennialMortgage.webp": "logo/CentennialMortgage.webp"
     };
 
     const brandPalettes = {
@@ -674,6 +676,42 @@
           primaryTextColor: "#121a26",
           secondaryTextColor: "#4b5d75"
         }
+      },
+      centennial: {
+        panelColor: [
+          { color: "#ffffff", label: "Centennial white" },
+          { color: "#f4f6f8", label: "Clean cool gray" },
+          { color: "#e7ebef", label: "Silver gray" },
+          { color: "#eef2f4", label: "Soft blue gray" },
+          { color: "#1c2730", label: "Deep charcoal" }
+        ],
+        accentColor: [
+          { color: "#1f5f7a", label: "Centennial blue" },
+          { color: "#2f7694", label: "Mortgage blue" },
+          { color: "#183f53", label: "Deep blue" },
+          { color: "#6c8796", label: "Slate blue" },
+          { color: "#9a7c4f", label: "Warm brass" }
+        ],
+        primaryTextColor: [
+          { color: "#17232c", label: "Charcoal ink" },
+          { color: "#183f53", label: "Deep Centennial blue" },
+          { color: "#1f5f7a", label: "Centennial blue" },
+          { color: "#ffffff", label: "White" },
+          { color: "#e7ebef", label: "Silver gray" }
+        ],
+        secondaryTextColor: [
+          { color: "#53636e", label: "Slate gray" },
+          { color: "#6c8796", label: "Blue gray" },
+          { color: "#2f7694", label: "Mortgage blue" },
+          { color: "#ffffff", label: "White" },
+          { color: "#c9d3d9", label: "Pale slate" }
+        ],
+        defaults: {
+          panelColor: "#f4f6f8",
+          accentColor: "#1f5f7a",
+          primaryTextColor: "#17232c",
+          secondaryTextColor: "#53636e"
+        }
       }
     };
 
@@ -712,6 +750,8 @@
         activeBrand = "revel";
       } else if (elements.logoSelect.value === "logo/parse_logo.svg") {
         activeBrand = "parse";
+      } else if (elements.logoSelect.value === "logo/CentennialMortgage.webp") {
+        activeBrand = "centennial";
       } else if (elements.logoSelect.value === "logo/TWC_Icon_rgb_light.svg") {
         activeBrand = "wolff";
       }
